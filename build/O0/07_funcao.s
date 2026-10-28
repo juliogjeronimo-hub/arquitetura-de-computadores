@@ -1,38 +1,39 @@
 	.file	"07_funcao.c"
 	.text
 	.globl	soma
-	.def	soma;	.scl	2;	.type	32;	.endef
-	.seh_proc	soma
+
+; int soma(int a, int b) {
 soma:
 	pushq	%rbp
-	.seh_pushreg	%rbp
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	.seh_endprologue
-	movl	%ecx, 16(%rbp)
-	movl	%edx, 24(%rbp)
-	movl	16(%rbp), %edx
-	movl	24(%rbp), %eax
-	addl	%edx, %eax
+
+; === Prólogo e parâmetros ===
+	movl	%ecx, 16(%rbp)    ; a = ecx em [rbp+16]
+	movl	%edx, 24(%rbp)    ; b = edx em [rbp+24]
+
+; === return a + b ---
+	movl	16(%rbp), %edx    ; edx = a
+	movl	24(%rbp), %eax    ; eax = b
+	addl	%edx, %eax        ; eax = a + b (valor de retorno)
+
+; === Epílogo ===
 	popq	%rbp
 	ret
-	.seh_endproc
+
 	.globl	chamada
-	.def	chamada;	.scl	2;	.type	32;	.endef
-	.seh_proc	chamada
+
+; int chamada(void) {
 chamada:
 	pushq	%rbp
-	.seh_pushreg	%rbp
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	subq	$32, %rsp
-	.seh_stackalloc	32
-	.seh_endprologue
-	movl	$6, %edx
-	movl	$4, %ecx
-	call	soma
+	subq	$32, %rsp         ; Aloca 32 bytes (shadow space)
+
+; === return soma(4, 6) ---
+	movl	$6, %edx          ; 2º argumento: b = 6 em edx
+	movl	$4, %ecx          ; 1º argumento: a = 4 em ecx
+	call	soma              ; Chama soma(4, 6), resultado em eax
+
+; === Retorno ===
 	addq	$32, %rsp
 	popq	%rbp
 	ret
-	.seh_endproc
-	.ident	"GCC: (Rev4, Built by MSYS2 project) 16.2.0"

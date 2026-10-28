@@ -1,30 +1,34 @@
 	.file	"08_recursao.c"
 	.text
 	.globl	fatorial
-	.def	fatorial;	.scl	2;	.type	32;	.endef
-	.seh_proc	fatorial
+
+; int fatorial(int n) {
 fatorial:
 	pushq	%rbp
-	.seh_pushreg	%rbp
 	movq	%rsp, %rbp
-	.seh_setframe	%rbp, 0
-	subq	$32, %rsp
-	.seh_stackalloc	32
-	.seh_endprologue
-	movl	%ecx, 16(%rbp)
-	cmpl	$1, 16(%rbp)
-	jg	.L2
-	movl	$1, %eax
-	jmp	.L3
+	subq	$32, %rsp         ; Aloca 32 bytes (shadow space)
+
+; === Parâmetro ===
+	movl	%ecx, 16(%rbp)    ; n = ecx em [rbp+16]
+
+; === if (n <= 1) ---
+	cmpl	$1, 16(%rbp)      ; Compara n com 1
+	jg	.L2                ; Se n > 1, pula para .L2 (caso recursivo)
+
+; === Caso base: return 1 ---
+	movl	$1, %eax          ; eax = 1
+	jmp	.L3               ; Pula para fim (.L3)
+
+; === Caso recursivo: return n * fatorial(n - 1) ---
 .L2:
-	movl	16(%rbp), %eax
-	subl	$1, %eax
-	movl	%eax, %ecx
-	call	fatorial
-	imull	16(%rbp), %eax
+	movl	16(%rbp), %eax    ; eax = n
+	subl	$1, %eax          ; eax = n - 1
+	movl	%eax, %ecx        ; ecx = n - 1 (1º argumento para chamada recursiva)
+	call	fatorial          ; Chama fatorial(n - 1), resultado em eax
+	imull	16(%rbp), %eax    ; eax = fatorial(n-1) * n
+
+; === Retorno ===
 .L3:
 	addq	$32, %rsp
 	popq	%rbp
 	ret
-	.seh_endproc
-	.ident	"GCC: (Rev4, Built by MSYS2 project) 16.2.0"
