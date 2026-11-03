@@ -1,34 +1,31 @@
-	.file	"01_soma.c"                    ; Nome do arquivo fonte
-	.intel_syntax noprefix              ; Sintaxe Intel (sem prefixos % ou $)
-	.text                               ; Seção de código executável
-	.globl	"soma_simples"              ; Torna a função visível ao linker
-	.def	"soma_simples";	.scl	2;	.type	32;	.endef  ; Metadados COFF
-
-; --- Prólogo da função ---
+	.file	"01_soma.c"
+	.intel_syntax noprefix
+	.text
+	.globl	"soma_simples"
+	.def	"soma_simples";	.scl	2;	.type	32;	.endef
 "soma_simples":
-	push	rbp                         ; Salva o frame pointer anterior
-	mov	rbp, rsp                    ; Estabelece novo frame: rbp = rsp
-	sub	rsp, 16                     ; Aloca 16 bytes na pilha para variáveis locais
+/* Prologo da funcao: salva frame pointer anterior e cria novo */
+	push	rbp				/* Salva rbp do caller na pilha */
+	mov	rbp, rsp			/* rbp = topo da pilha (novo frame) */
+	sub	rsp, 16				/* Aloca 16 bytes na pilha para variaveis locais */
 
-; --- Inicialização das variáveis locais ---
-	mov	DWORD PTR -4[rbp], 5       ; a = 5 em [rbp-4]
-	mov	DWORD PTR -8[rbp], 3       ; b = 3 em [rbp-8]
+/* int a = 5; */
+	mov	DWORD PTR -4[rbp], 5		/* a = 5 (armazena no stack em -4[rbp]) */
 
-; --- Carregamento dos valores em registradores ---
-	mov	edx, DWORD PTR -4[rbp]     ; edx = a (carrega de [rbp-4])
-	mov	eax, DWORD PTR -8[rbp]     ; eax = b (carrega de [rbp-8])
+/* int b = 3; */
+	mov	DWORD PTR -8[rbp], 3		/* b = 3 (armazena no stack em -8[rbp]) */
 
-; --- Operação de soma ---
-	add	eax, edx                    ; eax = eax + edx (c = a + b)
+/* int c = a + b; */
+/* Carrega valores de a e b nos registradores para somar */
+	mov	edx, DWORD PTR -4[rbp]	/* edx = a */
+	mov	eax, DWORD PTR -8[rbp]	/* eax = b */
+	add	eax, edx				/* eax = a + b (c = 8) */
+	mov	DWORD PTR -12[rbp], eax	/* c = eax (armazena resultado no stack) */
 
-; --- Armazenamento do resultado ---
-	mov	DWORD PTR -12[rbp], eax    ; c = eax em [rbp-12]
+/* return c; */
+	mov	eax, DWORD PTR -12[rbp]	/* eax = valor de retorno (c) */
 
-; --- Preparação do retorno ---
-	mov	eax, DWORD PTR -12[rbp]    ; eax = c (valor de retorno)
-
-; --- Epílogo da função ---
-	leave                           ; Desfaz o frame (equivalente a: mov rsp, rbp; pop rbp)
-	ret                             ; Retorna ao chamador
-
+/* Epilogo da funcao: restaura stack e retorna */
+	leave				/* rsp = rbp; pop rbp (libera frame e restaura anterior) */
+	ret					/* Retorna ao caller (valor em eax) */
 	.ident	"GCC: (Rev4, Built by MSYS2 project) 16.2.0"

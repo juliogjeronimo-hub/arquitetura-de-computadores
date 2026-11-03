@@ -3,72 +3,90 @@
 	.text
 	.globl	"soma_while"
 	.def	"soma_while";	.scl	2;	.type	32;	.endef
-
-; === Função soma_while(int n) ===
-; Calcula a soma 0 + 1 + 2 + ... + (n-1) usando while
 "soma_while":
+/* Prologo da funcao */
 	push	rbp
 	mov	rbp, rsp
-	sub	rsp, 16                     ; Aloca 16 bytes para variáveis locais
+	sub	rsp, 16				/* Aloca 16 bytes no stack */
 
-; Salva parâmetro (convenção Windows x64: n em ecx)
-	mov	DWORD PTR 16[rbp], ecx       ; n = ecx em [rbp+16]
+/* int soma_while(int n) { */
+/* Parametro n em ecx */
+	mov	DWORD PTR 16[rbp], ecx		/* Salva n */
 
-; Inicializa variáveis
-	mov	DWORD PTR -4[rbp], 0        ; soma = 0 em [rbp-4]
-	mov	DWORD PTR -8[rbp], 0        ; i = 0 em [rbp-8]
+/* int soma = 0; */
+	mov	DWORD PTR -4[rbp], 0		/* soma = 0 */
 
-; Pula para o teste de condição (while: sempre testa antes de entrar)
+/* int i = 0; */
+	mov	DWORD PTR -8[rbp], 0		/* i = 0 */
+
+/* while (i < n) { */
+/* Pula para condicao do loop (primeira verificacao) */
 	jmp	.L2
 
-; --- Corpo do loop (.L3) ---
+/* Corpo do loop (executa pelo menos uma vez se condicao verdadeira) */
 .L3:
-	mov	eax, DWORD PTR -8[rbp]       ; eax = i
-	add	DWORD PTR -4[rbp], eax       ; soma += i
-	add	DWORD PTR -8[rbp], 1         ; i++
+/* soma += i; */
+	mov	eax, DWORD PTR -8[rbp]		/* eax = i */
+	add	DWORD PTR -4[rbp], eax		/* soma = soma + i */
 
-; --- Teste de condição (.L2) ---
+/* i++; */
+	add	DWORD PTR -8[rbp], 1		/* i = i + 1 */
+
+/* Condicao: i < n */
 .L2:
-	mov	eax, DWORD PTR -8[rbp]       ; eax = i
-	cmp	eax, DWORD PTR 16[rbp]       ; Compara i com n
-	jl	.L3                         ; Se i < n, executa corpo (.L3)
+	mov	eax, DWORD PTR -8[rbp]		/* eax = i */
+	cmp	eax, DWORD PTR 16[rbp]		/* Compara i com n */
 
-; --- Retorno ---
-	mov	eax, DWORD PTR -4[rbp]       ; eax = soma (valor de retorno)
+/* Se i < n, executa corpo novamente */
+	jl	.L3				/* if (i < n) goto .L3 */
 
+/* return soma; */
+	mov	eax, DWORD PTR -4[rbp]		/* eax = soma */
+
+/* Epilogo */
 	leave
 	ret
 
-; === Função soma_dowhile(int n) ===
-; Calcula a soma 0 + 1 + 2 + ... + (n-1) usando do-while
+/* int soma_dowhile(int n) { */
 	.globl	"soma_dowhile"
 	.def	"soma_dowhile";	.scl	2;	.type	32;	.endef
 "soma_dowhile":
+/* Prologo da funcao */
 	push	rbp
 	mov	rbp, rsp
-	sub	rsp, 16                     ; Aloca 16 bytes para variáveis locais
+	sub	rsp, 16				/* Aloca 16 bytes no stack */
 
-; Salva parâmetro (convenção Windows x64: n em ecx)
-	mov	DWORD PTR 16[rbp], ecx       ; n = ecx em [rbp+16]
+/* Parametro n em ecx */
+	mov	DWORD PTR 16[rbp], ecx		/* Salva n */
 
-; Inicializa variáveis
-	mov	DWORD PTR -4[rbp], 0        ; soma = 0 em [rbp-4]
-	mov	DWORD PTR -8[rbp], 0        ; i = 0 em [rbp-8]
+/* int soma = 0; */
+	mov	DWORD PTR -4[rbp], 0		/* soma = 0 */
 
-; --- Corpo do loop (.L6) - executa ANTES de testar ---
+/* int i = 0; */
+	mov	DWORD PTR -8[rbp], 0		/* i = 0 */
+
+/* do { */
+/* Corpo executa ANTES da verificacao (diferenca do while) */
 .L6:
-	mov	eax, DWORD PTR -8[rbp]       ; eax = i
-	add	DWORD PTR -4[rbp], eax       ; soma += i
-	add	DWORD PTR -8[rbp], 1         ; i++
+/* soma += i; */
+	mov	eax, DWORD PTR -8[rbp]		/* eax = i */
+	add	DWORD PTR -4[rbp], eax		/* soma = soma + i */
 
-; --- Teste de condição (após execução do corpo) ---
-	mov	eax, DWORD PTR -8[rbp]       ; eax = i
-	cmp	eax, DWORD PTR 16[rbp]       ; Compara i com n
-	jl	.L6                         ; Se i < n, volta ao corpo (.L6)
+/* i++; */
+	add	DWORD PTR -8[rbp], 1		/* i = i + 1 */
 
-; --- Retorno ---
-	mov	eax, DWORD PTR -4[rbp]       ; eax = soma (valor de retorno)
+/* } while (i < n); */
+/* Verificacao apos o corpo */
+	mov	eax, DWORD PTR -8[rbp]		/* eax = i */
+	cmp	eax, DWORD PTR 16[rbp]		/* Compara i com n */
 
+/* Se i < n, repete o loop */
+	jl	.L6				/* if (i < n) goto .L6 */
+
+/* return soma; */
+	mov	eax, DWORD PTR -4[rbp]		/* eax = soma */
+
+/* Epilogo */
 	leave
 	ret
 	.ident	"GCC: (Rev4, Built by MSYS2 project) 16.2.0"

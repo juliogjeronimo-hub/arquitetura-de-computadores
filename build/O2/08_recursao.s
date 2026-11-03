@@ -6,18 +6,26 @@
 	.seh_proc	fatorial
 fatorial:
 	.seh_endprologue
-	movl	$1, %eax
-	cmpl	$1, %ecx
-	jle	.L1
+/* TAIL RECURSION ELIMINATION: Recursao convertida em loop! */
+/* Esta tecnica elimina a pilha de chamadas, transformando recursao em iteracao */
+
+	movl	$1, %eax			/* eax = 1 (valor inicial do fatorial) */
+	cmpl	$1, %ecx			/* Compara n com 1 */
+	jle	.L1				/* Se n <= 1, retorna 1 diretamente */
+
+/* Loop: multiplica n * (n-1) * (n-2) * ... * 1 */
 	.p2align 4
 	.p2align 4
 	.p2align 3
 .L2:
-	imull	%ecx, %eax
-	subl	$1, %ecx
-	cmpl	$1, %ecx
-	jne	.L2
+/* Corpo do loop: fatorial *= n, decrementa n */
+	imull	%ecx, %eax			/* eax = eax * ecx (multiplica resultado atual por n) */
+	subl	$1, %ecx			/* ecx = ecx - 1 (n--) */
+	cmpl	$1, %ecx			/* Compara n com 1 */
+	jne	.L2				/* Se n > 1, repete */
+
+/* Caso base ou termino do loop */
 .L1:
-	ret
+	ret					/* Retorna eax (resultado) */
 	.seh_endproc
 	.ident	"GCC: (Rev4, Built by MSYS2 project) 16.2.0"
